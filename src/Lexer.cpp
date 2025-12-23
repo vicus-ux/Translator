@@ -68,6 +68,9 @@ Token Lexer::getNextToken() {
                 } else if (currentChar == ')') {
                     advance();
                     return Token(TokenType::RPAREN, ")", startPos);
+                } else if (currentChar == ',') {
+                    advance();
+                    return Token(TokenType::COMMA, ",", startPos);
                 } else {
                     std::string unknown(1, advance());
                     return Token(TokenType::UNKNOWN, unknown, startPos);
@@ -86,6 +89,10 @@ Token Lexer::getNextToken() {
                 if (std::isalnum(currentChar) || currentChar == '_') {
                     tokenValue += advance();
                 } else {
+                    // Check if it's a function
+                    if (tokenValue == "sqrt" || tokenValue == "sin" || tokenValue == "cos") {
+                        return Token(TokenType::FUNCTION, tokenValue, startPos);
+                    }
                     return Token(TokenType::VARIABLE, tokenValue, startPos);
                 }
                 break;

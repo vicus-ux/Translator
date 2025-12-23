@@ -7,8 +7,10 @@ enum class TokenType {
     NUMBER,
     VARIABLE,
     OPERATOR,
+    FUNCTION,
     LPAREN,
     RPAREN,
+    COMMA,
     ASSIGN,
     END,
     UNKNOWN
@@ -24,6 +26,10 @@ struct Token {
     
     bool isOperator() const {
         return type == TokenType::OPERATOR;
+    }
+    
+    bool isFunction() const {
+        return type == TokenType::FUNCTION;
     }
 };
 

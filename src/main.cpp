@@ -9,6 +9,16 @@ void printHelp() {
     std::cout << "Supported operations: + - * / ^ (exponentiation)" << std::endl;
     std::cout << "You can use parentheses: (a + b) * c" << std::endl;
     std::cout << "Variable support: x = 5 + 3 * 2" << std::endl;
+    std::cout << "Unary minus support: -5, cos(-1), 3 * -2" << std::endl;
+    std::cout << "\nMath functions:" << std::endl;
+    std::cout << "  sqrt(x)   - square root" << std::endl;
+    std::cout << "  sin(x)    - sine (radians)" << std::endl;
+    std::cout << "  cos(x)    - cosine (radians)" << std::endl;
+    std::cout << "\nRoots of any degree:" << std::endl;
+    std::cout << "  x^(1/2)   - square root (same as sqrt(x))" << std::endl;
+    std::cout << "  x^(1/3)   - cube root" << std::endl;
+    std::cout << "  x^(1/4)   - fourth root" << std::endl;
+    std::cout << "  x^(1/n)   - n-th root" << std::endl;
     std::cout << "\nCommands:" << std::endl;
     std::cout << "  help      - show this help" << std::endl;
     std::cout << "  vars      - show all variables" << std::endl;

@@ -133,7 +133,10 @@ bool ExpressionTranslator::translate(const std::string& expression) {
         
         // Calculate expression
         double result = calculator.evaluate(rpn, rpnCount, variables);
-        std::cout << "\nResult: " << std::fixed << std::setprecision(6) << result << std::endl;
+        
+        // Display result
+        std::cout << "\n=== Calculation Result ===" << std::endl;
+        std::cout << "Result: " << result << std::endl;
         return true;
         
     } catch (const std::exception& e) {
