@@ -7,7 +7,7 @@
 ExpressionTranslator::ExpressionTranslator() {}
 
 bool ExpressionTranslator::processAssignment(const Token* tokens, int count) {
-    // Find assignment operator
+
     bool foundAssign = false;
     int assignIndex = -1;
     
@@ -23,11 +23,9 @@ bool ExpressionTranslator::processAssignment(const Token* tokens, int count) {
         return false;
     }
     
-    // Should be: VARIABLE = EXPRESSION
     if (count >= 3 && tokens[0].type == TokenType::VARIABLE) {
         std::string varName = tokens[0].value;
         
-        // Expression after '='
         int exprCount = count - assignIndex - 1;
         Token exprTokens[MAX_TOKENS];
         
@@ -35,29 +33,24 @@ bool ExpressionTranslator::processAssignment(const Token* tokens, int count) {
             exprTokens[i] = tokens[assignIndex + 1 + i];
         }
         
-        // Remove END token if exists
         if (exprCount > 0 && exprTokens[exprCount - 1].type == TokenType::END) {
             exprCount--;
         }
         
         try {
-            // Validate expression
             std::string error;
             if (!parser.validateExpression(exprTokens, exprCount, error)) {
                 std::cout << "Validation error: " << error << std::endl;
                 return false;
             }
             
-            // Convert to RPN
             Token rpn[MAX_RPN];
             int rpnCount = 0;
             parser.toRPN(exprTokens, exprCount, rpn, rpnCount, MAX_RPN);
             
-            // Calculate value
             VariableStorage& variables = lexer.getVariables();
             double value = calculator.evaluate(rpn, rpnCount, variables);
             
-            // Save variable value
             lexer.setVariable(varName, value);
             
             std::cout << "Variable '" << varName << "' = " << value << std::endl;
@@ -79,14 +72,12 @@ double ExpressionTranslator::requestVariableValue(const std::string& varName) {
 }
 
 bool ExpressionTranslator::translate(const std::string& expression) {
-    // Lexical analysis
     lexer.setInput(expression);
     
     Token tokens[MAX_TOKENS];
     int tokenCount = 0;
     lexer.getAllTokens(tokens, tokenCount, MAX_TOKENS);
     
-    // Check for lexical analysis errors
     for (int i = 0; i < tokenCount; i++) {
         if (tokens[i].type == TokenType::UNKNOWN) {
             std::cout << "Lexical analysis error: unknown symbol '" 
@@ -95,15 +86,12 @@ bool ExpressionTranslator::translate(const std::string& expression) {
         }
     }
     
-    // Display tokens
     printTokens(tokens, tokenCount);
     
-    // Check for assignment
     if (processAssignment(tokens, tokenCount)) {
         return true;
     }
     
-    // Validate expression
     std::string error;
     if (!parser.validateExpression(tokens, tokenCount, error)) {
         std::cout << "Validation error: " << error << std::endl;
@@ -111,15 +99,12 @@ bool ExpressionTranslator::translate(const std::string& expression) {
     }
     
     try {
-        // Convert to RPN
         Token rpn[MAX_RPN];
         int rpnCount = 0;
         parser.toRPN(tokens, tokenCount, rpn, rpnCount, MAX_RPN);
         
-        // Display RPN
         RPNCalculator::printRPN(rpn, rpnCount);
         
-        // Request values for undefined variables
         VariableStorage& variables = lexer.getVariables();
         for (int i = 0; i < tokenCount; i++) {
             if (tokens[i].type == TokenType::VARIABLE) {
@@ -131,10 +116,8 @@ bool ExpressionTranslator::translate(const std::string& expression) {
             }
         }
         
-        // Calculate expression
         double result = calculator.evaluate(rpn, rpnCount, variables);
         
-        // Display result
         std::cout << "\n=== Calculation Result ===" << std::endl;
         std::cout << "Result: " << result << std::endl;
         return true;

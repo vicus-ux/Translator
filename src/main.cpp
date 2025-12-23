@@ -33,8 +33,6 @@ void printWelcome() {
 }
 
 int main() {
-    // Remove locale setting or use only for numbers
-    // setlocale(LC_ALL, "ru_RU.UTF-8");
     
     ExpressionTranslator translator;
     std::string input;
@@ -45,7 +43,6 @@ int main() {
         std::cout << "\n>>> ";
         std::getline(std::cin, input);
         
-        // Remove leading and trailing whitespace
         const char* whitespace = " \t";
         size_t start = input.find_first_not_of(whitespace);
         if (start == std::string::npos) {
@@ -54,7 +51,6 @@ int main() {
         size_t end = input.find_last_not_of(whitespace);
         input = input.substr(start, end - start + 1);
         
-        // Check commands
         if (input == "exit" || input == "quit") {
             std::cout << "Exiting program." << std::endl;
             break;
@@ -79,7 +75,6 @@ int main() {
             continue;
         }
         
-        // Process expression
         translator.translate(input);
     }
     
