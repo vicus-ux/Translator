@@ -3,13 +3,14 @@
 
 #include "Token.h"
 #include "Variable.h"
+class Lexer;
 
 class RPNCalculator {
 public:
     double performOperation(double a, double b, const std::string& op) const;
-    double evaluate(const Token* rpn, int rpnCount, VariableStorage& variables);
+    double evaluate(const Token* rpn, int rpnCount, VariableStorage& variables, 
+                    const Lexer& lexer); 
     static void printRPN(const Token* rpn, int count);
 };
 
 #endif // RPNCALCULATOR_H
-

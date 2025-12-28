@@ -1,5 +1,6 @@
 #include "Lexer.h"
 #include <cctype>
+#include <cmath>
 
 void Lexer::skipWhitespace() {
     while (pos < input.length() && std::isspace(input[pos])) {
@@ -9,6 +10,16 @@ void Lexer::skipWhitespace() {
 
 bool Lexer::isOperator(char c) const {
     return c == '+' || c == '-' || c == '*' || c == '/' || c == '^' || c == '=';
+}
+
+bool Lexer::isConstant(const std::string& name) const {
+    return name == "pi" || name == "e";
+}
+
+double Lexer::getConstantValue(const std::string& name) const {
+    if (name == "pi") return M_PI;
+    if (name == "e") return M_E;
+    return 0.0;
 }
 
 char Lexer::peek() const {
@@ -40,9 +51,9 @@ Token Lexer::getNextToken() {
     }
     
     State state = State::START;
-    State prevState = State::START;
     std::string tokenValue;
     int startPos = pos;
+    int dotCount = 0;
     
     while (true) {
         char currentChar = peek();
@@ -52,6 +63,7 @@ Token Lexer::getNextToken() {
                 if (std::isdigit(currentChar) || currentChar == '.') {
                     state = State::IN_NUMBER;
                     tokenValue += advance();
+                    if (currentChar == '.') dotCount = 1;
                 } else if (std::isalpha(currentChar) || currentChar == '_') {
                     state = State::IN_VARIABLE;
                     tokenValue += advance();
@@ -68,6 +80,9 @@ Token Lexer::getNextToken() {
                 } else if (currentChar == ')') {
                     advance();
                     return Token(TokenType::RPAREN, ")", startPos);
+                } else if (currentChar == ',') {
+                    advance();
+                    return Token(TokenType::COMMA, ",", startPos);
                 } else {
                     std::string unknown(1, advance());
                     return Token(TokenType::UNKNOWN, unknown, startPos);
@@ -75,9 +90,18 @@ Token Lexer::getNextToken() {
                 break;
                 
             case State::IN_NUMBER:
-                if (std::isdigit(currentChar) || currentChar == '.') {
+                if (std::isdigit(currentChar)) {
+                    tokenValue += advance();
+                } else if (currentChar == '.') {
+                    if (dotCount >= 1) {
+                        return Token(TokenType::UNKNOWN, tokenValue + advance(), startPos);
+                    }
+                    dotCount++;
                     tokenValue += advance();
                 } else {
+                    if (!tokenValue.empty() && tokenValue.back() == '.') {
+                        return Token(TokenType::UNKNOWN, tokenValue, startPos);
+                    }
                     return Token(TokenType::NUMBER, tokenValue, startPos);
                 }
                 break;
@@ -86,6 +110,12 @@ Token Lexer::getNextToken() {
                 if (std::isalnum(currentChar) || currentChar == '_') {
                     tokenValue += advance();
                 } else {
+                    if (isConstant(tokenValue)) {
+                        return Token(TokenType::CONSTANT, tokenValue, startPos);
+                    }
+                    if (tokenValue == "sqrt" || tokenValue == "sin" || tokenValue == "cos") {
+                        return Token(TokenType::FUNCTION, tokenValue, startPos);
+                    }
                     return Token(TokenType::VARIABLE, tokenValue, startPos);
                 }
                 break;

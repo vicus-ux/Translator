@@ -6,8 +6,10 @@ std::string tokenTypeToString(TokenType type) {
         case TokenType::NUMBER: return "NUMBER";
         case TokenType::VARIABLE: return "VARIABLE";
         case TokenType::OPERATOR: return "OPERATOR";
+        case TokenType::FUNCTION: return "FUNCTION";
         case TokenType::LPAREN: return "LPAREN";
         case TokenType::RPAREN: return "RPAREN";
+        case TokenType::COMMA: return "COMMA";
         case TokenType::ASSIGN: return "ASSIGN";
         case TokenType::END: return "END";
         case TokenType::UNKNOWN: return "UNKNOWN";

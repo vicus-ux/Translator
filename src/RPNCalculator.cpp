@@ -1,4 +1,5 @@
 #include "RPNCalculator.h"
+#include "Lexer.h"
 #include "Stack.h"
 #include <iostream>
 #include <cmath>
@@ -24,7 +25,8 @@ double RPNCalculator::performOperation(double a, double b, const std::string& op
     }
 }
 
-double RPNCalculator::evaluate(const Token* rpn, int rpnCount, VariableStorage& variables) {
+double RPNCalculator::evaluate(const Token* rpn, int rpnCount, VariableStorage& variables, 
+                               const Lexer& lexer) {
     Stack<double> values;
     
     for (int i = 0; i < rpnCount; i++) {
@@ -43,6 +45,36 @@ double RPNCalculator::evaluate(const Token* rpn, int rpnCount, VariableStorage& 
                 throw std::runtime_error(error.str());
             }
         }
+        else if (token.type == TokenType::CONSTANT) {
+            double value = lexer.getConstantValue(token.value);
+            values.push(value);
+        }
+        else if (token.type == TokenType::FUNCTION) {
+            if (values.size() < 1) {
+                throw std::runtime_error("Not enough arguments for function " + token.value);
+            }
+            
+            double arg = values.top(); values.pop();
+            double result;
+            
+            if (token.value == "sqrt") {
+                if (arg < 0) {
+                    throw std::runtime_error("sqrt: argument must be non-negative");
+                }
+                result = sqrt(arg);
+            } 
+            else if (token.value == "sin") {
+                result = sin(arg);
+            } 
+            else if (token.value == "cos") {
+                result = cos(arg);
+            }
+            else {
+                throw std::runtime_error("Unknown function: " + token.value);
+            }
+            
+            values.push(result);
+        }
         else if (token.type == TokenType::OPERATOR) {
             if (values.size() < 2) {
                 throw std::runtime_error("Not enough operands for operator " + token.value);
@@ -54,7 +86,6 @@ double RPNCalculator::evaluate(const Token* rpn, int rpnCount, VariableStorage& 
             values.push(result);
         }
         else if (token.type == TokenType::ASSIGN) {
-            // Handle assignment in RPN
             if (values.size() < 2) {
                 throw std::runtime_error("Not enough operands for assignment");
             }
@@ -76,7 +107,10 @@ void RPNCalculator::printRPN(const Token* rpn, int count) {
     std::cout << "Expression: ";
     
     for (int i = 0; i < count; i++) {
-        std::cout << rpn[i].value << " ";
+        std::cout << rpn[i].value;
+        if (i < count - 1) {
+            std::cout << " ";
+        }
     }
     std::cout << std::endl;
 }
