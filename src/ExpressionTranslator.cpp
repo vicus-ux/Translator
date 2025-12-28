@@ -6,8 +6,36 @@
 
 ExpressionTranslator::ExpressionTranslator() {}
 
-bool ExpressionTranslator::processAssignment(const Token* tokens, int count) {
+static void printTokens(const Token* tokens, int count) {
+    std::cout << "\n=== LEXICAL ANALYSIS ===" << std::endl;
+    std::cout << "Tokens: ";
+    
+    for (int i = 0; i < count; i++) {
+        if (tokens[i].type == TokenType::END) break;
+        
+        std::string typeStr;
+        switch (tokens[i].type) {
+            case TokenType::NUMBER: typeStr = "NUM"; break;
+            case TokenType::VARIABLE: typeStr = "VAR"; break;
+            case TokenType::CONSTANT: typeStr = "CONST"; break;
+            case TokenType::OPERATOR: typeStr = "OP"; break;
+            case TokenType::FUNCTION: typeStr = "FUNC"; break;
+            case TokenType::LPAREN: typeStr = "("; break;
+            case TokenType::RPAREN: typeStr = ")"; break;
+            case TokenType::COMMA: typeStr = ","; break;
+            case TokenType::ASSIGN: typeStr = "="; break;
+            default: typeStr = "UNK"; break;
+        }
+        
+        std::cout << "[" << typeStr << ":" << tokens[i].value << "]";
+        if (i < count - 1 && tokens[i+1].type != TokenType::END) {
+            std::cout << " ";
+        }
+    }
+    std::cout << std::endl;
+}
 
+bool ExpressionTranslator::processAssignment(const Token* tokens, int count) {
     bool foundAssign = false;
     int assignIndex = -1;
     
@@ -48,13 +76,28 @@ bool ExpressionTranslator::processAssignment(const Token* tokens, int count) {
             int rpnCount = 0;
             parser.toRPN(exprTokens, exprCount, rpn, rpnCount, MAX_RPN);
             
+            std::cout << "\nAssignment: " << varName << " = ";
+            for (int i = 0; i < exprCount; i++) {
+                std::cout << exprTokens[i].value;
+            }
+            std::cout << std::endl;
+            
+            printTokens(exprTokens, exprCount);
+            
+            std::cout << "Polish notation: ";
+            for (int i = 0; i < rpnCount; i++) {
+                std::cout << rpn[i].value << " ";
+            }
+            std::cout << std::endl;
+            
             VariableStorage& variables = lexer.getVariables();
-            double value = calculator.evaluate(rpn, rpnCount, variables);
+            double value = calculator.evaluate(rpn, rpnCount, variables, lexer);
             
             lexer.setVariable(varName, value);
             
-            std::cout << "Variable '" << varName << "' = " << value << std::endl;
+            std::cout << "Result: " << varName << " = " << value << std::endl;
             return true;
+            
         } catch (const std::exception& e) {
             std::cout << "Calculation error: " << e.what() << std::endl;
             return false;
@@ -64,7 +107,7 @@ bool ExpressionTranslator::processAssignment(const Token* tokens, int count) {
 }
 
 double ExpressionTranslator::requestVariableValue(const std::string& varName) {
-    std::cout << "Enter value for variable '" << varName << "': ";
+    std::cout << "Enter value for '" << varName << "': ";
     double value;
     std::cin >> value;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -72,6 +115,8 @@ double ExpressionTranslator::requestVariableValue(const std::string& varName) {
 }
 
 bool ExpressionTranslator::translate(const std::string& expression) {
+    std::cout << "\nExpression: " << expression << std::endl;
+    
     lexer.setInput(expression);
     
     Token tokens[MAX_TOKENS];
@@ -80,7 +125,7 @@ bool ExpressionTranslator::translate(const std::string& expression) {
     
     for (int i = 0; i < tokenCount; i++) {
         if (tokens[i].type == TokenType::UNKNOWN) {
-            std::cout << "Lexical analysis error: unknown symbol '" 
+            std::cout << "Lexical error: unknown symbol '" 
                       << tokens[i].value << "' at position " << tokens[i].position << std::endl;
             return false;
         }
@@ -94,7 +139,7 @@ bool ExpressionTranslator::translate(const std::string& expression) {
     
     std::string error;
     if (!parser.validateExpression(tokens, tokenCount, error)) {
-        std::cout << "Validation error: " << error << std::endl;
+        std::cout << "Syntax error: " << error << std::endl;
         return false;
     }
     
@@ -103,7 +148,11 @@ bool ExpressionTranslator::translate(const std::string& expression) {
         int rpnCount = 0;
         parser.toRPN(tokens, tokenCount, rpn, rpnCount, MAX_RPN);
         
-        RPNCalculator::printRPN(rpn, rpnCount);
+        std::cout << "Polish notation: ";
+        for (int i = 0; i < rpnCount; i++) {
+            std::cout << rpn[i].value << " ";
+        }
+        std::cout << std::endl;
         
         VariableStorage& variables = lexer.getVariables();
         for (int i = 0; i < tokenCount; i++) {
@@ -116,14 +165,14 @@ bool ExpressionTranslator::translate(const std::string& expression) {
             }
         }
         
-        double result = calculator.evaluate(rpn, rpnCount, variables);
+        double result = calculator.evaluate(rpn, rpnCount, variables, lexer);
         
-        std::cout << "\n=== Calculation Result ===" << std::endl;
-        std::cout << "Result: " << result << std::endl;
+        std::cout << "Result: " << std::fixed << std::setprecision(6) << result << std::endl;
+        
         return true;
         
     } catch (const std::exception& e) {
-        std::cout << "Error: " << e.what() << std::endl;
+        std::cout << "Calculation error: " << e.what() << std::endl;
         return false;
     }
 }
@@ -133,7 +182,7 @@ void ExpressionTranslator::showVariables() const {
     if (vars.size() == 0) {
         std::cout << "No variables defined" << std::endl;
     } else {
-        std::cout << "\n=== VARIABLES ===" << std::endl;
+        std::cout << "\nVariables:" << std::endl;
         const Variable* variables = vars.getVariables();
         for (int i = 0; i < vars.size(); i++) {
             std::cout << "  " << variables[i].name << " = " << variables[i].value << std::endl;

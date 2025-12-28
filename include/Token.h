@@ -6,6 +6,7 @@
 enum class TokenType {
     NUMBER,
     VARIABLE,
+    CONSTANT,
     OPERATOR,
     FUNCTION,
     LPAREN,
@@ -21,20 +22,12 @@ struct Token {
     std::string value;
     int position;
     
-    Token() : type(TokenType::UNKNOWN), value(""), position(0) {}
-    Token(TokenType t, const std::string& v, int p) : type(t), value(v), position(p) {}
+    Token(TokenType t = TokenType::END, const std::string& v = "", int p = 0)
+        : type(t), value(v), position(p) {}
     
     bool isOperator() const {
-        return type == TokenType::OPERATOR;
-    }
-    
-    bool isFunction() const {
-        return type == TokenType::FUNCTION;
+        return type == TokenType::OPERATOR || type == TokenType::ASSIGN;
     }
 };
 
-std::string tokenTypeToString(TokenType type);
-void printTokens(const Token* tokens, int count);
-
 #endif // TOKEN_H
-

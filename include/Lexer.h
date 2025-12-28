@@ -11,7 +11,6 @@ public:
         START,
         IN_NUMBER,
         IN_VARIABLE,
-        IN_OPERATOR,
         DONE
     };
     
@@ -22,11 +21,13 @@ private:
     
     void skipWhitespace();
     bool isOperator(char c) const;
+    bool isConstant(const std::string& name) const; 
     char peek() const;
     char advance();
     
 public:
     Lexer(const std::string& str = "");
+    
     void setInput(const std::string& str);
     Token getNextToken();
     void getAllTokens(Token* tokens, int& count, int maxTokens);
@@ -36,7 +37,8 @@ public:
     void setVariable(const std::string& name, double value);
     bool getVariable(const std::string& name, double& value) const;
     bool hasVariable(const std::string& name) const;
+    
+    double getConstantValue(const std::string& name) const; 
 };
 
 #endif // LEXER_H
-

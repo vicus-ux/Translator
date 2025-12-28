@@ -26,4 +26,3 @@ public:
 };
 
 #endif // EXPRESSIONTRANSLATOR_H
-

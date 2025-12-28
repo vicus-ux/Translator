@@ -1,4 +1,5 @@
 #include "RPNCalculator.h"
+#include "Lexer.h"
 #include "Stack.h"
 #include <iostream>
 #include <cmath>
@@ -24,7 +25,8 @@ double RPNCalculator::performOperation(double a, double b, const std::string& op
     }
 }
 
-double RPNCalculator::evaluate(const Token* rpn, int rpnCount, VariableStorage& variables) {
+double RPNCalculator::evaluate(const Token* rpn, int rpnCount, VariableStorage& variables, 
+                               const Lexer& lexer) {
     Stack<double> values;
     
     for (int i = 0; i < rpnCount; i++) {
@@ -42,6 +44,10 @@ double RPNCalculator::evaluate(const Token* rpn, int rpnCount, VariableStorage& 
                 error << "Undefined variable: " << token.value;
                 throw std::runtime_error(error.str());
             }
+        }
+        else if (token.type == TokenType::CONSTANT) {
+            double value = lexer.getConstantValue(token.value);
+            values.push(value);
         }
         else if (token.type == TokenType::FUNCTION) {
             if (values.size() < 1) {
@@ -80,7 +86,6 @@ double RPNCalculator::evaluate(const Token* rpn, int rpnCount, VariableStorage& 
             values.push(result);
         }
         else if (token.type == TokenType::ASSIGN) {
-            // Handle assignment in RPN
             if (values.size() < 2) {
                 throw std::runtime_error("Not enough operands for assignment");
             }

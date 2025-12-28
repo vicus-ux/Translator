@@ -22,20 +22,17 @@ void VariableStorage::resize(int newCapacity) {
 }
 
 void VariableStorage::add(const std::string& name, double value) {
-    // Проверяем, существует ли уже переменная
+
     for (int i = 0; i < count; i++) {
         if (variables[i].name == name) {
             variables[i].value = value;
             return;
         }
     }
-    
-    // Если нет места, увеличиваем массив
     if (count >= capacity) {
         resize(capacity * 2);
     }
     
-    // Добавляем новую переменную
     variables[count].name = name;
     variables[count].value = value;
     count++;
@@ -48,8 +45,6 @@ void VariableStorage::set(const std::string& name, double value) {
             return;
         }
     }
-    
-    // Если переменной нет, добавляем
     add(name, value);
 }
 
